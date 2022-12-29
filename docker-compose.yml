@@ -8,6 +8,8 @@ services:
       - ./app:/var/www
     ports:
       - 3031:3031
+    depends_on:
+      - mysql
     restart: always
 
   nginx:
@@ -20,3 +22,28 @@ services:
     depends_on:
       - uwsgi
     restart: always
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 'password'
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin
+    depends_on:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      MEMORY_LIMIT: 128M
+      UPLOAD_LIMIT: 64M
+    restart: always
+    ports:
+      - "8080:80"
+
+volumes:
+    db_data: {}
