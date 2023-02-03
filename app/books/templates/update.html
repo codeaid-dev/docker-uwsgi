@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{title}}{% endblock %}
+{% block content %}
+  {% if error %}
+    <ul>
+    {% for err in error %}
+      <li>{{ err }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+  {% if normal %}
+    <p>{{ normal }}</p>
+  {% endif %}
+  <h1>{{title}}</h1>
+  <form action="{{ url_for('update') }}" method="POST">
+    <p>ISBN：{{ values.isbn }}</p>
+    <input type="hidden" name="isbn" value="{{ values.isbn }}">
+    <p><label>書籍名：<input type="text" name="name" value="{{ values.name }}" required></label></p>
+    <p><label>価格：<input type="text" name="price" value="{{ values.price }}" required></label></p>
+    <p><label>ページ数：<input type="text" name="page" value="{{ values.page }}" required></label></p>
+    <p><label>発売日：<input type="date" name="date" value="{{ values.date }}" required></label></p>
+    <button type="submit">修正</button>
+  </form>
+  <p><span style="margin-right: 30px"><a href="/">トップ</a></span><a href="{{ url_for('read') }}">閲覧ページ</a></p>
+{% endblock %}

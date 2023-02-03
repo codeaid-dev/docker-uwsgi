@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{title}}{% endblock %}
+{% block content %}
+  <h1>{{title}}</h1>
+  <form action="{{ url_for('read') }}" method="POST">
+    <p><label>ISBNもしくは書籍名：<input type="text" name="keyword"></label></p>
+    <p><button type="submit">表示</button></p>
+  </form>
+  <p><span style="margin-right: 30px"><a href="/">トップ</a></span><a href="write">保存ページ</a></p>
+  <hr>
+  {% if delete %}
+    <p>ISBN:{{ delete }}を削除しました。</p>
+  {% endif %}
+
+  {% if result %}
+    {% for res in result %}
+      <p>ISBN：{{ res['isbn'] }}</p>
+      <p>書籍名：{{ res['name'] }}</p>
+      <p>価格：{{ res['price'] }}</p>
+      <p>ページ数：{{ res['page'] }}</p>
+      <p>発売日：{{ res['date'] }}</p>
+      <form action="{{ url_for('read') }}" method="POST" style="display:inline-block">
+        <input type="hidden" name="delete" value="{{ res['isbn'] }}">
+        <p><button type="submit">削除</button></p>
+      </form>
+      <form action="{{ url_for('update') }}" method="POST" style="display:inline-block">
+        <input type="hidden" name="update" value="{{ res['isbn'] }}">
+        <input type="hidden" name="name" value="{{ res['name'] }}">
+        <input type="hidden" name="price" value="{{ res['price'] }}">
+        <input type="hidden" name="page" value="{{ res['page'] }}">
+        <input type="hidden" name="date" value="{{ res['date'] }}">
+        <p><button type="submit">修正</button></p>
+      </form>
+      <p>-------------------------</p>
+      <br>
+    {% endfor %}
+  {% endif %}
+{% endblock %}
