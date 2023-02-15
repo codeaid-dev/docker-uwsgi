@@ -26,7 +26,7 @@ def sample():
         res = ''
         cnx = mysql.connector.connect(user='root', password='password',
                                     host='mysql', database='sampledb')
-        cur = cnx.cursor()
+        cur = cnx.cursor(prepared=True)
         res += '接続成功<br>'
         cur.execute('''CREATE TABLE IF NOT EXISTS users (
                     id INTEGER PRIMARY KEY,
@@ -43,12 +43,12 @@ def sample():
         else:
             app.logger.error(err)
 
-    cur.execute("INSERT INTO users VALUES(1, 'Yamada', 85)")
-    cur.execute("INSERT INTO users VALUES(2, 'Tanaka', 79)")
-    cur.execute("INSERT INTO users VALUES(3, 'Suzuki', 63)")
+    data = [(1, 'Yamada', 85),(2, 'Tanaka', 79),(3, 'Suzuki', 63)]
+    for d in data:
+        cur.execute("INSERT INTO users VALUES(?, ?, ?)", d)
     res += 'データ挿入<br>'
 
-    cur.execute("SELECT * FROM users WHERE score >= 70")
+    cur.execute("SELECT * FROM users WHERE score >= ?", (70,))
     result = cur.fetchall()
     res += '70点以上選択<br>'
     for id,name,score in result:

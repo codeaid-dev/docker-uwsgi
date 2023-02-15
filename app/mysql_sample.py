@@ -4,7 +4,7 @@ from mysql.connector import errorcode
 try:
     cnx = mysql.connector.connect(user='root', password='password',
                                 host='mysql', database='sampledb')
-    cur = cnx.cursor()
+    cur = cnx.cursor(prepared=True)
     print('接続成功')
     cur.execute('''CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY,
@@ -21,13 +21,16 @@ except mysql.connector.Error as err:
     else:
         print(err)
 
-cur.execute("INSERT INTO users VALUES(1, 'Yamada', 85)")
-cur.execute("INSERT INTO users VALUES(2, 'Tanaka', 79)")
-cur.execute("INSERT INTO users VALUES(3, 'Suzuki', 63)")
+data = [(1, 'Yamada', 85),(2, 'Tanaka', 79),(3, 'Suzuki', 63)]
+for d in data:
+    cur.execute("INSERT INTO users VALUES(?, ?, ?)", d)
+#cur.execute("INSERT INTO users VALUES(1, 'Yamada', 85)")
+#cur.execute("INSERT INTO users VALUES(2, 'Tanaka', 79)")
+#cur.execute("INSERT INTO users VALUES(3, 'Suzuki', 63)")
 print('データ挿入')
-#cnx.commit()
 
-cur.execute("SELECT * FROM users WHERE score >= 70")
+cur.execute("SELECT * FROM users WHERE score >= ?", (70,))
+#cur.execute("SELECT * FROM users WHERE score >= 70")
 result = cur.fetchall()
 print('70点以上選択')
 for id,name,score in result:
