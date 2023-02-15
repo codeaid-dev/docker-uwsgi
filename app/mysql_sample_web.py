@@ -33,33 +33,35 @@ def sample():
                     name VARCHAR(20),
                     score INTEGER);''')
         res += 'テーブル作成<br>'
+
+        data = [(1, 'Yamada', 85),(2, 'Tanaka', 79),(3, 'Suzuki', 63)]
+        for d in data:
+            cur.execute("INSERT INTO users VALUES(?, ?, ?)", d)
+        res += 'データ挿入<br>'
+
+        cur.execute("SELECT * FROM users WHERE score >= ?", (70,))
+        result = cur.fetchall()
+        res += '70点以上選択<br>'
+        for id,name,score in result:
+            res += f'{id}\t{name}\t{score}<br>'
+
+        cur.execute("DROP TABLE users")
+        res += 'テーブル削除<br>'
+        cnx.commit()
+
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-            app.logger.error("Something is wrong with your user name or password")
+            app.logger.error("ユーザー名かパスワードが間違っています")
         elif err.errno == errorcode.ER_BAD_DB_ERROR:
-            app.logger.error("Database does not exist")
+            app.logger.error("データーベースがありません")
         elif err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
-            app.logger.error("already exists.")
+            app.logger.error("そのテーブルはすでに存在しています")
         else:
             app.logger.error(err)
 
-    data = [(1, 'Yamada', 85),(2, 'Tanaka', 79),(3, 'Suzuki', 63)]
-    for d in data:
-        cur.execute("INSERT INTO users VALUES(?, ?, ?)", d)
-    res += 'データ挿入<br>'
-
-    cur.execute("SELECT * FROM users WHERE score >= ?", (70,))
-    result = cur.fetchall()
-    res += '70点以上選択<br>'
-    for id,name,score in result:
-        res += f'{id}\t{name}\t{score}<br>'
-
-    cur.execute("DROP TABLE users")
-    res += 'テーブル削除<br>'
-
-    cnx.commit()
-    cur.close()
-    cnx.close()
+    finally:
+        if cnx:
+            cnx.close()
 
     return render_template('mysqlsample.html', page_name='MySQLサンプルページ！！', time=now, result=res)
 

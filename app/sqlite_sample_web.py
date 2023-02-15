@@ -14,33 +14,43 @@ def index():
 def sample():
     now = datetime.datetime.now().strftime('%Y年%m月%d日%H:%M:%S')
     res = ''
-    con = sqlite3.connect(dbname)
-    res += '接続成功<br>'
-    cur = con.cursor()
-    cur.execute('''
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY,
-        name TEXT,
-        score INTEGER
-    )''')
-    res += 'テーブル作成<br>'
+    try:
+        con = sqlite3.connect(dbname)
+        res += '接続成功<br>'
+        cur = con.cursor()
+        cur.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY,
+            name TEXT,
+            score INTEGER
+        )''')
+        res += 'テーブル作成<br>'
 
-    data = [(1, 'Yamada', 85),(2, 'Tanaka', 79),(3, 'Suzuki', 63)]
-    for d in data:
-        cur.execute("INSERT INTO users VALUES(?, ?, ?)", d)
-    res += 'データ挿入<br>'
+        data = [(1, 'Yamada', 85),(2, 'Tanaka', 79)]
+        cur.executemany("INSERT INTO users VALUES(?, ?, ?)", data)
+        cur.execute("INSERT INTO users VALUES(:id, :name, :score)", {'id':3,'name':'Suzuki','score':63})
+        #cur.execute("INSERT INTO users VALUES(1, 'Yamada', 85)")
+        #cur.execute("INSERT INTO users VALUES(2, 'Tanaka', 79)")
+        #cur.execute("INSERT INTO users VALUES(3, 'Suzuki', 63)")
+        res += 'データ挿入<br>'
 
-    cur.execute("SELECT * FROM users WHERE score >= ?", (70,))
-    result = cur.fetchall()
-    res += '70点以上選択<br>'
-    for id,name,score in result:
-        res += f'{id}\t{name}\t{score}<br>'
+        cur.execute("SELECT * FROM users WHERE score >= ?", (70,))
+        #cur.execute("SELECT * FROM users WHERE score >= 70")
+        result = cur.fetchall()
+        res += '70点以上選択<br>'
+        for id,name,score in result:
+            res += f'{id}\t{name}\t{score}<br>'
 
-    cur.execute("DROP TABLE users")
-    res += 'テーブル削除<br>'
+        cur.execute("DROP TABLE users")
+        res += 'テーブル削除<br>'
+        con.commit()
 
-    con.commit()
-    con.close()
+    except sqlite3.Error as e:
+        app.logger.error(e)
+
+    finally:
+        if con:
+            con.close()
     return render_template('sqlitesample.html', page_name='SQLiteサンプルページ！！', time=now, result=res)
 
 if __name__ == '__main__':

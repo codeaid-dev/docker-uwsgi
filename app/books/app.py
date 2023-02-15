@@ -1,25 +1,38 @@
 from flask import Flask, render_template, request, redirect, url_for
-import os, sqlite3
+import os, sqlite3, logging
 
 TITLE = '書籍データ庫'
 app = Flask(__name__)
 base_path = os.path.dirname(__file__)
 db_path = base_path + '/books.db'
 
+debug_handler = logging.FileHandler('debug.log')
+debug_handler.setLevel(logging.DEBUG)
+app.logger.addHandler(debug_handler)
+error_handler = logging.FileHandler('error.log')
+error_handler.setLevel(logging.ERROR)
+app.logger.addHandler(error_handler)
+app.logger.setLevel(logging.DEBUG)
+
 def create_db():
-    con = sqlite3.connect(db_path)
-    cur = con.cursor()
-    cur.execute('''
-    CREATE TABLE IF NOT EXISTS books (
-        isbn VARCHAR(17) NOT NULL PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        price INTEGER NOT NULL,
-        page INTEGER NOT NULL,
-        date TEXT NOT NULL
-    )
-    ''')
-    con.commit()
-    con.close()
+    try:
+        con = sqlite3.connect(db_path)
+        cur = con.cursor()
+        cur.execute('''
+        CREATE TABLE IF NOT EXISTS books (
+            isbn VARCHAR(17) NOT NULL PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            price INTEGER NOT NULL,
+            page INTEGER NOT NULL,
+            date TEXT NOT NULL
+        )
+        ''')
+        con.commit()
+    except sqlite3.Error as e:
+        app.logger.error(e)
+    finally:
+        if con:
+            con.close()
 
 def dict_factory(cursor, row):
     d = {}
@@ -28,15 +41,20 @@ def dict_factory(cursor, row):
     return d
 
 def exec(sql, *arg):
-    con = sqlite3.connect(db_path)
-    con.row_factory = dict_factory
-    cur = con.cursor()
-    cur.execute(sql, arg)
-    res = None
-    if sql.lstrip().upper().startswith('SELECT'):
-        res = cur.fetchall()
-    con.commit()
-    con.close()
+    try:
+        con = sqlite3.connect(db_path)
+        con.row_factory = dict_factory
+        cur = con.cursor()
+        cur.execute(sql, arg)
+        res = None
+        if sql.lstrip().upper().startswith('SELECT'):
+            res = cur.fetchall()
+        con.commit()
+    except sqlite3.Error as e:
+        app.logger.error(e)
+    finally:
+        if con:
+            con.close()
     return res
 
 def check_isbn(isbn):
