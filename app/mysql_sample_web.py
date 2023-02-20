@@ -36,16 +36,16 @@ def sample():
 
         data = [(1, 'Yamada', 85),(2, 'Tanaka', 79),(3, 'Suzuki', 63)]
         for d in data:
-            cur.execute("INSERT INTO users VALUES(?, ?, ?)", d)
+            cur.execute("INSERT INTO users VALUES(?, ?, ?);", d)
         res += 'データ挿入<br>'
 
-        cur.execute("SELECT * FROM users WHERE score >= ?", (70,))
+        cur.execute("SELECT * FROM users WHERE score >= ?;", (70,))
         result = cur.fetchall()
         res += '70点以上選択<br>'
         for id,name,score in result:
             res += f'{id}\t{name}\t{score}<br>'
 
-        cur.execute("DROP TABLE users")
+        cur.execute("DROP TABLE users;")
         res += 'テーブル削除<br>'
         cnx.commit()
 
