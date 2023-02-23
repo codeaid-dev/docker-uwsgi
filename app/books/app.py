@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 import os, sqlite3, logging
+from contextlib import closing
 
 TITLE = '書籍データ庫'
 app = Flask(__name__)
@@ -16,45 +17,33 @@ app.logger.setLevel(logging.DEBUG)
 
 def create_db():
     try:
-        con = sqlite3.connect(db_path)
-        cur = con.cursor()
-        cur.execute('''
-        CREATE TABLE IF NOT EXISTS books (
-            isbn VARCHAR(17) NOT NULL PRIMARY KEY,
-            name VARCHAR(255) NOT NULL,
-            price INTEGER NOT NULL,
-            page INTEGER NOT NULL,
-            date TEXT NOT NULL
-        )
-        ''')
-        con.commit()
+        with closing(sqlite3.connect('sample.db')) as con:
+            cur = con.cursor()
+            cur.execute('''CREATE TABLE IF NOT EXISTS books (
+                isbn VARCHAR(17) NOT NULL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                price INTEGER NOT NULL,
+                page INTEGER NOT NULL,
+                date TEXT NOT NULL)''')
     except sqlite3.Error as e:
         app.logger.error(e)
-    finally:
-        if con:
-            con.close()
 
 def dict_factory(cursor, row):
-    d = {}
-    for idx, col in enumerate(cursor.description):
-        d[col[0]] = row[idx]
-    return d
+    fields = [column[0] for column in cursor.description]
+    return {key: value for key, value in zip(fields, row)}
 
 def exec(sql, *arg):
     try:
-        con = sqlite3.connect(db_path)
-        con.row_factory = dict_factory
-        cur = con.cursor()
-        cur.execute(sql, arg)
-        res = None
-        if sql.lstrip().upper().startswith('SELECT'):
-            res = cur.fetchall()
-        con.commit()
+        with closing(sqlite3.connect('sample.db')) as con:
+            con.row_factory = dict_factory
+            cur = con.cursor()
+            cur.execute(sql, arg)
+            res = None
+            if sql.lstrip().upper().startswith('SELECT'):
+                res = cur.fetchall()
+            con.commit()
     except sqlite3.Error as e:
         app.logger.error(e)
-    finally:
-        if con:
-            con.close()
     return res
 
 def check_isbn(isbn):
@@ -72,7 +61,6 @@ def index():
 def update():
     error = []
     normal = ''
-    update = ''
     values = {'isbn':'','name':'','price':'','page':'','date':''}
     if 'update' in request.form: # 閲覧ページから修正ボタンが押された
         values['isbn'] = request.form['update']
@@ -134,7 +122,7 @@ def write():
                 normal = '保存できました。'
             else:
                 normal = '入力したISBNはすでに保存されています。'
-        return render_template('write.html', title=TITLE, error=error, values=values, normal=normal, update=update)
+        return render_template('write.html', title=TITLE, error=error, values=values, normal=normal)
     else:
         return render_template('write.html', title=TITLE, values=values)
 
