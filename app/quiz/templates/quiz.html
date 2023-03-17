@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{{title}}{% endblock %}
+{% block content %}
+  <h1>{{title}}</h1>
+  <form action="{{ url_for('quiz') }}" method="POST">
+    <input type="hidden" name="id" value="{{ values.id }}">
+    <p>問題：{{ values.question }}</p>
+    <p><label>答え：<input type="text" name="answer" required></label></p>
+    <button type="submit">解答</button>
+  </form>
+  <h2>結果表示</h2>
+  {% if result %}
+    <p>{{ result }}</p>
+  {% endif %}
+  <form action="{{ url_for('quiz') }}" method="GET">
+    <button type="submit">次の問題</button>
+  </form>
+  <p><span style="margin-right: 30px"><a href="/">トップ</a></span><span style="margin-right: 30px"><a href="{{ url_for('save') }}">新規作成</a></span><a href="{{ url_for('edit') }}">編集</a></p>
+{% endblock %}

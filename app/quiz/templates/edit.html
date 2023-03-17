@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{title}}{% endblock %}
+{% block content %}
+  {% if error %}
+    <p>{{ error }}</p>
+  {% endif %}
+  <h1>{{title}}</h1>
+  <form action="{{ url_for('edit') }}" method="POST">
+    <p><label>番号：<input type="text" name="id" value="{{ values.id }}" required></label></p>
+    <p><label>問題：<input type="text" name="question" value="{{ values.question }}"></label></p>
+    <p><label>答え：<input type="text" name="answer" value="{{ values.answer }}"></label></p>
+    <button type="submit" name="get">読込(番号)</button>
+    <button type="submit" name="edit">修正</button>
+    <button type="submit" name="delete">削除</button>
+  </form>
+  <hr>
+  <p>クイズ一覧</p>
+  {% if quizlist %}
+    <table>
+      <thead>
+        <tr>
+          <th>番号</th>
+          <th>問題</th>
+          <th>答え</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for l in quizlist %}
+          <tr><td>{{ l['id'] }}</td>
+          <td>{{ l['question'] }}</td>
+          <td>{{ l['answer'] }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+  <hr>
+  <p><span style="margin-right: 30px"><a href="/">トップ</a></span><span style="margin-right: 30px"><a href="{{ url_for('save') }}">新規作成</a></span><a href="{{ url_for('quiz') }}">出題</a></p>
+{% endblock %}

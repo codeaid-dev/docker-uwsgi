@@ -17,7 +17,7 @@ app.logger.setLevel(logging.DEBUG)
 
 def create_db():
     try:
-        with closing(sqlite3.connect('sample.db')) as con:
+        with closing(sqlite3.connect(db_path)) as con:
             cur = con.cursor()
             cur.execute('''CREATE TABLE IF NOT EXISTS books (
                 isbn VARCHAR(17) NOT NULL PRIMARY KEY,
@@ -34,7 +34,7 @@ def dict_factory(cursor, row):
 
 def exec(sql, *arg):
     try:
-        with closing(sqlite3.connect('sample.db')) as con:
+        with closing(sqlite3.connect(db_path)) as con:
             con.row_factory = dict_factory
             cur = con.cursor()
             cur.execute(sql, arg)

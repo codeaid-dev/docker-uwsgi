@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}{{title}}{% endblock %}
+{% block content %}
+  <h1>{{title}}</h1>
+  <p>クイズを作成保存し、保存したクイズを出題します。</p>
+  <p><span style="margin-right: 30px"><a href="{{ url_for('save') }}">新規作成</a></span>
+  <span style="margin-right: 30px"><a href="{{ url_for('edit') }}">編集</a></span>
+  <a href="{{ url_for('quiz') }}">出題</a></p>
+{% endblock %}
