@@ -53,29 +53,36 @@ def index():
 
 @app.route('/edit', methods=['GET','POST'])
 def edit():
-    error = ''
-    normal = ''
-    quizlist = []
+    info = ''
     values = {'id':'','question':'','answer':''}
     values['id'] = request.form['id'] if 'id' in request.form else ''
     values['question'] = request.form['question'] if 'question' in request.form else ''
     values['answer'] = request.form['answer'] if 'answer' in request.form else ''
+    quizlist = exec('SELECT * FROM questions')
     if request.method == 'POST':
+        for q in quizlist:
+            if str(q['id']) == values['id']:
+                break
+        else:
+            info = '指定した番号はありません。'
+
         if values['id'].isdigit():
             if 'edit' in request.form: # 修正ボタンが押された
                 exec('UPDATE questions SET question=?, answer=? WHERE id=?', values['question'], values['answer'], values['id'])
-                normal = f"番号{values['id']}を修正しました。"
+                info = f"番号{values['id']}を修正しました。"
+                quizlist = exec('SELECT * FROM questions')
             if 'delete' in request.form: # 削除ボタンが押された
                 exec('DELETE FROM questions WHERE id=?', values['id'])
-                normal = f"番号{values['id']}を削除しました。"
+                info = f"番号{values['id']}を削除しました。"
+                quizlist = exec('SELECT * FROM questions')
             if 'get' in request.form: # 読込ボタンが押された
                 res = exec('SELECT * FROM questions WHERE id=?', values['id'])
-                values['question'] = res[0]['question'] if res else ''
-                values['answer'] = res[0]['answer'] if res else ''
+                if res:
+                    values['question'] = res[0]['question']
+                    values['answer'] = res[0]['answer']
         else:
-            error = '番号は数字で入力してください。'
-    quizlist = exec('SELECT * FROM questions')
-    return render_template('edit.html', title='クイズ編集', error=error, values=values, normal=normal, quizlist=quizlist)
+            info = '番号は数字で入力してください。'
+    return render_template('edit.html', title='クイズ編集', info=info, values=values, quizlist=quizlist)
 
 @app.route('/quiz', methods=['GET','POST'])
 def quiz():
