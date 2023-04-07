@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}
+ToDoアプリ
+{% endblock %}
+{% block content %}
+  <h1>ToDo - {{ username }}</h1>
+  <form method="post">
+    <input type="hidden" name="id" value="{{ id }}">
+    <textarea name="task" rows="4" cols="30">{{ task['task'] }}</textarea><br>
+    <button type="submit" name="edit">修正</button>
+  </form>
+  <br>
+  <a href="{{ url_for('logout') }}">ログアウト</a>
+  <a href="{{ url_for('leave') }}" style="margin-left: 20px;">ユーザー登録解除</a>
+{% endblock %}

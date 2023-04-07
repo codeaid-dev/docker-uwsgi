@@ -27,6 +27,7 @@ def create_db():
                 date TEXT NOT NULL)''')
     except sqlite3.Error as e:
         app.logger.error(e)
+create_db()
 
 def dict_factory(cursor, row):
     fields = [column[0] for column in cursor.description]
@@ -54,7 +55,6 @@ def check_isbn(isbn):
 
 @app.route('/')
 def index():
-    create_db()
     return render_template('index.html', title=TITLE)
 
 @app.route('/update', methods=['POST'])

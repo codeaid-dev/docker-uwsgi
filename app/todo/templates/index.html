@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}
+ToDoアプリ
+{% endblock %}
+{% block head %}
+  <style>
+    table {
+      border-collapse: collapse;
+      border: 2px solid rgb(200, 200, 200);
+      letter-spacing: 1px;
+      font-family: sans-serif;
+      font-size: 0.8rem;
+    }
+    td,th {
+      border: 1px solid rgb(190, 190, 190);
+      padding: 5px 10px;
+    }
+    td {
+      text-align: center;
+    }
+  </style>
+{% endblock %}
+{% block content %}
+  <h1>ToDo - {{ username }}</h1>
+  <form method="post">
+    <textarea name="task" rows="4" cols="30" placeholder="タスク追加"></textarea><br>
+    <button type="submit" name="add">追加</button>
+  </form>
+  <br>
+  <table>
+    <tr>
+      <th>タスク</th>
+      <th>処理</th>
+    </tr>
+    {% for task in tasks %}
+    <tr>
+      <td>
+        {% for line in task['task'].split('\n') %}
+          {{ line }}<br>
+        {% endfor %}
+      </td>
+      <td><a href="/todo?del={{ task['id'] }}">削除</a>
+      <a href="/todo/edit?edit={{ task['id'] }}">修正</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+  <br>
+  <a href="{{ url_for('logout') }}">ログアウト</a>
+  <a href="{{ url_for('leave') }}" style="margin-left: 20px;">ユーザー登録解除</a>
+{% endblock %}

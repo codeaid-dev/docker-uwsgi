@@ -27,6 +27,7 @@ def create_db():
             )''')
     except sqlite3.Error as e:
         app.logger.error(e)
+create_db()
 
 def dict_factory(cursor, row):
     fields = [column[0] for column in cursor.description]
@@ -48,7 +49,6 @@ def exec(sql, *arg):
 
 @app.route('/')
 def index():
-    create_db()
     return render_template('index.html', title='クイズ作成と出題')
 
 @app.route('/edit', methods=['GET','POST'])
