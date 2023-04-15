@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import os, sqlite3, hashlib
 from datetime import timedelta
 from contextlib import closing
+from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
 app.secret_key = 'Msd4EsJIk6AoVD3g' #セッション情報を暗号化するためのキー
@@ -45,6 +46,7 @@ def exec(sql, *arg):
     return res
 
 def to_hash(password):
+    password += 'uMoJL3h90SenH7:r' #SALTを加える
     text = password.encode('utf-8')
     hash = hashlib.sha256(text).hexdigest()
     return hash
@@ -76,14 +78,26 @@ def login():
     error = ''
     if request.method == 'POST':
         username = request.form['username']
-        password = to_hash(request.form['password'])
-        sql = 'SELECT * FROM users WHERE username=? AND password=?'
-        result = exec(sql, username, password)
-        if result:
+
+        password = request.form['password']
+        sql = 'SELECT * FROM users WHERE username=?'
+        user = exec(sql, username)[0]
+        if user in None:
+            error = 'ユーザー名が誤っています。'
+        elif not check_password_hash(user['password'], password):
+            error = 'パスワードが誤っています。'
+        else:
             session['username'] = username
             return redirect(url_for('index'))
-        else:
-            error = 'ログイン失敗'
+
+        #password = to_hash(request.form['password'])
+        #sql = 'SELECT * FROM users WHERE username=? AND password=?'
+        #result = exec(sql, username, password)
+        #if result:
+        #    session['username'] = username
+        #    return redirect(url_for('index'))
+        #else:
+        #    error = 'ログイン失敗'
     return render_template('login.html', error=error)
 
 @app.route('/todo/logout')
@@ -113,7 +127,8 @@ def signup():
     error = ''
     if request.method == 'POST':
         username = request.form['username']
-        password = to_hash(request.form['password'])
+        #password = to_hash(request.form['password'])
+        password = generate_password_hash(request.form['password'])
         sql = 'SELECT * FROM users WHERE username=?'
         result = exec(sql, username)
         if result:
