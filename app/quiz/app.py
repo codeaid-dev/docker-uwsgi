@@ -66,22 +66,26 @@ def edit():
         else:
             info = '指定した番号はありません。'
 
-        if values['id'].isdigit():
-            if 'edit' in request.form: # 修正ボタンが押された
-                exec('UPDATE questions SET question=?, answer=? WHERE id=?', values['question'], values['answer'], values['id'])
-                info = f"番号{values['id']}を修正しました。"
-                quizlist = exec('SELECT * FROM questions')
-            if 'delete' in request.form: # 削除ボタンが押された
-                exec('DELETE FROM questions WHERE id=?', values['id'])
-                info = f"番号{values['id']}を削除しました。"
-                quizlist = exec('SELECT * FROM questions')
-            if 'get' in request.form: # 読込ボタンが押された
-                res = exec('SELECT * FROM questions WHERE id=?', values['id'])
-                if res:
-                    values['question'] = res[0]['question']
-                    values['answer'] = res[0]['answer']
-        else:
-            info = '番号は数字で入力してください。'
+        if not info:
+            if values['id'].isdigit():
+                if 'edit' in request.form: # 修正ボタンが押された
+                    if values['question'] and values['answer']:
+                        exec('UPDATE questions SET question=?, answer=? WHERE id=?', values['question'], values['answer'], values['id'])
+                        info = f"番号{values['id']}を修正しました。"
+                        quizlist = exec('SELECT * FROM questions')
+                    else:
+                        info = '問題か答えが空白です。'
+                if 'delete' in request.form: # 削除ボタンが押された
+                    exec('DELETE FROM questions WHERE id=?', values['id'])
+                    info = f"番号{values['id']}を削除しました。"
+                    quizlist = exec('SELECT * FROM questions')
+                if 'get' in request.form: # 読込ボタンが押された
+                    res = exec('SELECT * FROM questions WHERE id=?', values['id'])
+                    if res:
+                        values['question'] = res[0]['question']
+                        values['answer'] = res[0]['answer']
+            else:
+                info = '番号は数字で入力してください。'
     return render_template('edit.html', title='クイズ編集', info=info, values=values, quizlist=quizlist)
 
 @app.route('/quiz', methods=['GET','POST'])
