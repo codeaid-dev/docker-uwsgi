@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-import os, sqlite3, hashlib
+import os, sqlite3, hashlib, re
 from datetime import timedelta
 from contextlib import closing
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -81,15 +81,16 @@ def login():
 
         password = request.form['password']
         sql = 'SELECT * FROM users WHERE username=?'
-        user = exec(sql, username)[0]
-        if user in None:
+        user = exec(sql, username)
+        if not user:
             error = 'ユーザー名が誤っています。'
-        elif not check_password_hash(user['password'], password):
+        elif not check_password_hash(user[0]['password'], password):
             error = 'パスワードが誤っています。'
         else:
             session['username'] = username
             return redirect(url_for('index'))
 
+        #自身でハッシュ化する場合
         #password = to_hash(request.form['password'])
         #sql = 'SELECT * FROM users WHERE username=? AND password=?'
         #result = exec(sql, username, password)
@@ -127,17 +128,22 @@ def signup():
     error = ''
     if request.method == 'POST':
         username = request.form['username']
-        #password = to_hash(request.form['password'])
-        password = generate_password_hash(request.form['password'])
-        sql = 'SELECT * FROM users WHERE username=?'
-        result = exec(sql, username)
-        if result:
-            error = 'このユーザー名は登録できません。'
+        pwd = re.search(re.compile('(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[\W_])[\w\W]{8,32}$'), request.form['password'])
+        if pwd != None:
+          print('有効なパスワードです')
+          #password = to_hash(request.form['password'])
+          password = generate_password_hash(request.form['password'])
+          sql = 'SELECT * FROM users WHERE username=?'
+          result = exec(sql, username)
+          if result:
+              error = 'このユーザー名は登録できません。'
+          else:
+              sql = 'INSERT INTO users (username, password) VALUES (?, ?)'
+              exec(sql, username, password)
+              session['username'] = username
+              return redirect(url_for('index'))
         else:
-            sql = 'INSERT INTO users (username, password) VALUES (?, ?)'
-            exec(sql, username, password)
-            session['username'] = username
-            return redirect(url_for('index'))
+            error = 'パスワードは8~32文字で大小文字英字数字記号をそれぞれ1文字以上含める必要があります。'
     return render_template('signup.html', error=error)
 
 @app.route('/todo/edit', methods=['GET','POST'])
