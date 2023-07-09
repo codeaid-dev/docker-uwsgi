@@ -88,7 +88,7 @@ def edit():
                 info = '番号は数字で入力してください。'
     return render_template('edit.html', title='クイズ編集', info=info, values=values, quizlist=quizlist)
 
-@app.route('/quiz', methods=['GET','POST'])
+@app.route('/quiz/', methods=['GET','POST'])
 def quiz():
     global question
     result = None
