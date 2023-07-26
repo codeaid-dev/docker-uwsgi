@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}
+アンケート
+{% endblock %}
+{% block head %}
+
+{% endblock %}
+{% block content %}
+<h1>回答一覧</h1>
+<table class="anstbl">
+  <tr>
+    <th class="ansth">回答日時</th>
+    <th class="ansth">名前</th>
+    <th class="ansth">メールアドレス</th>
+    <th class="ansth">年齢</th>
+    <th class="ansth">興味のあるプログラム言語</th>
+    <th class="ansth">学習に使っているパソコン</th>
+    <th class="ansth">パソコンメーカー</th>
+    <th class="ansth">コメント</th>
+    <th class="ansth">処理</th>
+  </tr>
+  {% for answer in answers %}
+  <tr>
+    <td class="anstd">{{answer['created_at']}}</td>
+    <td class="anstd">{{answer['name']}}</td>
+    <td class="anstd">{{answer['email']}}</td>
+    <td class="anstd">{{answer['age']}}</td>
+    <td class="anstd">{{answer['program']}}</td>
+    <td class="anstd">{{answer['pc']}}</td>
+    <td class="anstd">{{answer['maker']}}</td>
+    <td class="anstd">
+      {% for row in answer['comments'].split('\n') %}
+      {{row}}<br>
+      {% endfor %}
+    </td>
+    <td class="anstd">
+      <form method="POST">
+        <input type="hidden" name="delete" value="{{answer['email']}}">
+        <button type="submit">削除</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+<form method="POST">
+  <p><button type="submit" name="download">ダウンロード</button>
+  <button type="submit" name="alldel" style="margin-left:20px;">全て削除</button></p>
+</form>
+<p><a href="{{ url_for('logout') }}">ログアウト</a>
+<a href="{{ url_for('leave') }}" style="margin-left: 20px;">ユーザー登録解除</a></p>
+{% endblock %}
