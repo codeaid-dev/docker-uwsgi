@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}
+ブログアプリ
+{% endblock %}
+{% block head %}
+{% endblock %}
+{% block content %}
+<h1>ブログアプリ</h1>
+<h2>記事一覧</h2>
+{% if posts %}
+  <ul>
+    {% for post in posts %}
+      <li>
+        <p><a href="/blog?post={{post['id']}}">{{ post['title'] }}</a><br>
+        <span style="font-size:10px; margin-right:10px;">作成日：{{ post['created_at'] }}</span>
+        <span style="font-size:10px;">更新日：{{ post['updated_at'] }}</span></p>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>記事がありません。</p>
+{% endif %}
+{% endblock %}

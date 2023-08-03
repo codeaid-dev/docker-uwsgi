@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}
+アンケート
+{% endblock %}
+{% block head %}
+
+{% endblock %}
+{% block content %}
+<h1>ご回答ありがとうございました。</h1>
+<p>
+  名前：{{postdata['name']}}<br>
+  メールアドレス：{{postdata['email']}}<br>
+  年齢：{{postdata['age']}}<br>
+  興味のあるプログラム言語：{{'|'.join(programs)}}<br>
+  学習に使われるパソコン：{{postdata['pc']}}<br>
+  パソコンメーカー：{{maker}}<br>
+  コメント：<br>
+  {% for c in postdata['comments'].split('\n') %}
+    {{c}}<br>
+  {% endfor %}
+</p>
+<p><a href="{{ url_for('index') }}">トップ</a></p>
+{% endblock %}

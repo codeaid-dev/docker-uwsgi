@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}
+ブログアプリ
+{% endblock %}
+{% block head %}
+
+{% endblock %}
+{% block content %}
+<h1>管理画面</h1>
+<p><a href="{{ url_for('add') }}"><button>新規追加</button></a></p>
+<h2>記事一覧</h2>
+{% if posts %}
+  <ul>
+  {% for post in posts %}
+    <li>
+      <p>{{post['title']}}<br>
+        <span style="font-size:10px; margin-right:10px;">作成日：{{ post['created_at'] }}</span>
+        <span style="font-size:10px;">更新日：{{ post['updated_at'] }}</span><br>
+        <a href="/blog/admin/edit?id={{post['id']}}">編集</a>
+      </p>
+  </li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p>記事がありません。</p>
+{% endif %}
+<p><a href="{{ url_for('logout') }}">ログアウト</a>
+<a href="{{ url_for('leave') }}" style="margin-left: 20px;">ユーザー登録解除</a></p>
+{% endblock %}

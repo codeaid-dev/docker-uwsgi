@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}
+ブログアプリ
+{% endblock %}
+{% block head %}
+
+{% endblock %}
+{% block content %}
+<h1>記事編集</h1>
+<form action="{{url_for('edit')}}" method="POST">
+  <label for="title">タイトル</label><br>
+  <input type="text" id="title" name="title" value="{{post['title']}}" required><br><br>
+
+  <label for="article">記事</label><br>
+  <textarea id="article" name="article" rows="5" cols="40" required>{{post['article']}}</textarea>
+  <input type="hidden" name="id" value="{{post['id']}}">
+  <p><button type="submit" name="update" style="margin-right:20px;">更新</button><button type="submit" name="delete">削除</button></p>
+</form>
+<p><a href="{{url_for('admin')}}">トップ</a></p>
+{% endblock %}
