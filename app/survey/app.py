@@ -71,7 +71,7 @@ def has_email(email):
 @app.route('/survey/', methods=['GET', 'POST'])
 def index():
     postdata = {'name':'','email':'','age':'','program':{},'pc':'','maker':[],'comments':''}
-    makers = ['lenovo','dell','hp','apple','dynabook','nec','vaio','asus','self','other']
+    makers = ['Lenovo','DELL','HP','Apple','Dynabook','NEC','VAIO','ASUS','自作','その他']
     errors = []
     if request.method == 'POST':
         postdata['name'] = request.form['name'] if 'name' in request.form else ''
@@ -93,10 +93,12 @@ def index():
         postdata['program']['Ruby'] = 'checked' if 'Ruby' in programs else ''
         postdata['pc'] = request.form['pc'] if 'pc' in request.form else ''
         maker = request.form['maker'] if 'maker' in request.form else ''
-        postdata['maker'] = ['selected' if makers[i]==maker else '' for i in range(len(makers))]
+        postdata['maker'] = ['selected' if m==maker else '' for m in makers]
         postdata['comments'] = request.form['comments'] if 'comments' in request.form else ''
         if not errors:
             sql = 'INSERT INTO answers (name,email,age,program,pc,maker,comments) VALUES (?,?,?,?,?,?,?)'
+            if not maker:
+                maker = 'その他'
             exec(sql,postdata['name'],postdata['email'],postdata['age'],'|'.join(programs),postdata['pc'],maker,postdata['comments'])
             return render_template('thanks.html', postdata=postdata, programs=programs, maker=maker)
     return render_template('index.html', postdata=postdata, errors=errors)
@@ -180,23 +182,23 @@ def signup():
         return redirect(url_for('admin'))
     error = ''
     exist = ''
-    if request.method == 'POST':
-        username = request.form['username']
-        pwd = re.search(re.compile('(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[\W_])[\w\W]{8,32}$'), request.form['password'])
-        if pwd != None:
-          #password = to_hash(request.form['password'])
-          password = generate_password_hash(request.form['password'])
-          sql = 'SELECT * FROM siteadmin'
-          result = exec(sql)
-          if result:
-              exist = '管理者はすでに登録済みです。'
-          else:
-              sql = 'INSERT INTO siteadmin (username, password) VALUES (?, ?)'
-              exec(sql, username, password)
-              session['username'] = username
-              return redirect(url_for('admin'))
-        else:
-            error = 'パスワードは8~32文字で大小文字英字数字記号をそれぞれ1文字以上含める必要があります。'
+    sql = 'SELECT * FROM siteadmin'
+    result = exec(sql)
+    if result:
+        exist = '管理者はすでに登録済みです。'
+    else:
+        if request.method == 'POST':
+            username = request.form['username']
+            pwd = re.search(re.compile('(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[\W_])[\w\W]{8,32}$'), request.form['password'])
+            if pwd != None:
+                #password = to_hash(request.form['password'])
+                password = generate_password_hash(request.form['password'])
+                sql = 'INSERT INTO siteadmin (username, password) VALUES (?, ?)'
+                exec(sql, username, password)
+                session['username'] = username
+                return redirect(url_for('admin'))
+            else:
+                error = 'パスワードは8~32文字で大小文字英字数字記号をそれぞれ1文字以上含める必要があります。'
     return render_template('signup.html', error=error, exist=exist)
 
 if __name__ == '__main__':

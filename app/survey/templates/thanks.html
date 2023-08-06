@@ -13,7 +13,11 @@
   年齢：{{postdata['age']}}<br>
   興味のあるプログラム言語：{{'|'.join(programs)}}<br>
   学習に使われるパソコン：{{postdata['pc']}}<br>
-  パソコンメーカー：{{maker}}<br>
+  {% if maker %}
+    パソコンメーカー：{{maker}}<br>
+  {% else %}
+    パソコンメーカー：その他<br>
+  {% endif %}
   コメント：<br>
   {% for c in postdata['comments'].split('\n') %}
     {{c}}<br>

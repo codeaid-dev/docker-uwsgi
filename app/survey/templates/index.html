@@ -58,18 +58,18 @@
     </fieldset>
     </p><p>
     <label for="maker">パソコンメーカー：</label>
-    <select name="maker" id="maker">
-      <option value="other">選択してください。</option>
-      <option value="lenovo" {{postdata['maker'][0]}}>Lenovo</option>
-      <option value="dell" {{postdata['maker'][1]}}>DELL</option>
-      <option value="hp" {{postdata['maker'][2]}}>HP</option>
-      <option value="apple" {{postdata['maker'][3]}}>Apple</option>
-      <option value="dynabook" {{postdata['maker'][4]}}>Dynabook</option>
-      <option value="nec" {{postdata['maker'][5]}}>NEC</option>
-      <option value="vaio" {{postdata['maker'][6]}}>VAIO</option>
-      <option value="asus" {{postdata['maker'][7]}}>ASUS</option>
-      <option value="self" {{postdata['maker'][8]}}>自作</option>
-      <option value="other" {{postdata['maker'][9]}}>その他</option>
+    <select name="maker" id="maker" required>
+      <option value="">選択してください。</option>
+      <option value="Lenovo" {{postdata['maker'][0]}}>Lenovo</option>
+      <option value="DELL" {{postdata['maker'][1]}}>DELL</option>
+      <option value="HP" {{postdata['maker'][2]}}>HP</option>
+      <option value="Apple" {{postdata['maker'][3]}}>Apple</option>
+      <option value="Dynabook" {{postdata['maker'][4]}}>Dynabook</option>
+      <option value="NEC" {{postdata['maker'][5]}}>NEC</option>
+      <option value="VAIO" {{postdata['maker'][6]}}>VAIO</option>
+      <option value="ASUS" {{postdata['maker'][7]}}>ASUS</option>
+      <option value="自作" {{postdata['maker'][8]}}>自作</option>
+      <option value="その他" {{postdata['maker'][9]}}>その他</option>
     </select>
     </p><p>
       <label for="comments">コメント：</label><br>
