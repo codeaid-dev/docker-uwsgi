@@ -192,21 +192,20 @@ def signup():
         return redirect(url_for('admin'))
     error = ''
     exist = ''
+    sql = 'SELECT * FROM siteadmin'
+    result = exec(sql)
+    if result:
+        exist = '管理者はすでに登録済みです。'
     if request.method == 'POST':
         username = request.form['username']
         pwd = re.search(re.compile('(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[\W_])[\w\W]{8,32}$'), request.form['password'])
         if pwd != None:
-          #password = to_hash(request.form['password'])
-          password = generate_password_hash(request.form['password'])
-          sql = 'SELECT * FROM siteadmin'
-          result = exec(sql)
-          if result:
-              exist = '管理者はすでに登録済みです。'
-          else:
-              sql = 'INSERT INTO siteadmin (username, password) VALUES (?, ?)'
-              exec(sql, username, password)
-              session['username'] = username
-              return redirect(url_for('admin'))
+            #password = to_hash(request.form['password'])
+            password = generate_password_hash(request.form['password'])
+            sql = 'INSERT INTO siteadmin (username, password) VALUES (?, ?)'
+            exec(sql, username, password)
+            session['username'] = username
+            return redirect(url_for('admin'))
         else:
             error = 'パスワードは8~32文字で大小文字英字数字記号をそれぞれ1文字以上含める必要があります。'
     return render_template('signup.html', error=error, exist=exist)
