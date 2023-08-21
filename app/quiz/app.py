@@ -1,12 +1,14 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, session
 import os, sqlite3, logging
 from contextlib import closing
 import random
+from datetime import timedelta
 
 app = Flask(__name__)
+app.secret_key = 'Msd4EsJIk6AoVD3g' #セッション情報を暗号化するためのキー
+app.permanent_session_lifetime = timedelta(minutes=10) #セッション有効期限10分
 base_path = os.path.dirname(__file__)
 db_path = base_path + '/quiz.db'
-question = None
 
 debug_handler = logging.FileHandler('debug.log')
 debug_handler.setLevel(logging.DEBUG)
@@ -90,9 +92,9 @@ def edit():
 
 @app.route('/quiz/', methods=['GET','POST'])
 def quiz():
-    global question
     result = None
     if request.method == 'POST':
+        question = session['question'] if 'question' in session else {}
         if 'answer' in request.form:
             if request.form['answer'] == question['answer']:
                 result = '正解です'
@@ -101,6 +103,7 @@ def quiz():
     else:
         res = exec('SELECT * FROM questions')
         question = random.choice(res)
+        session['question'] = question
 
     return render_template('quiz.html', title='クイズ出題', values=question, result=result)
 
