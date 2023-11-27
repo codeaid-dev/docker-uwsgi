@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-import os, sqlite3, hashlib, re
+import os, sqlite3, hashlib, re, logging
 from datetime import timedelta
 from contextlib import closing
 from werkzeug.security import check_password_hash, generate_password_hash
+import mysql.connector
 
 app = Flask(__name__)
 app.secret_key = 'Msd4EsJIk6AoVD3g' #セッション情報を暗号化するためのキー
@@ -10,16 +11,28 @@ app.permanent_session_lifetime = timedelta(minutes=10) #セッション有効期
 base_path = os.path.dirname(__file__)
 db_path = base_path + '/todo.db'
 
+debug_handler = logging.FileHandler('debug.log')
+debug_handler.setLevel(logging.DEBUG)
+app.logger.addHandler(debug_handler)
+error_handler = logging.FileHandler('error.log')
+error_handler.setLevel(logging.ERROR)
+app.logger.addHandler(error_handler)
+app.logger.setLevel(logging.DEBUG)
+
 def create_db():
     try:
-        with closing(sqlite3.connect(db_path)) as con:
-            cur = con.cursor()
+        with closing(mysql.connector.connect(user='root', password='password',
+                                host='mysql', database='todo')) as con: #MySQL
+        #with closing(sqlite3.connect(db_path)) as con: #SQLite
+            cur = con.cursor(prepared=True,dictionary=True) #MySQL
+            #cur = con.cursor() #SQLite
+            #For SQLite using AUTOINCREMENT, for MySQL using AUTO_INCREMENT
             cur.execute('''CREATE TABLE IF NOT EXISTS users (
                 username VARCHAR(256) NOT NULL PRIMARY KEY,
                 password VARCHAR(256) NOT NULL
                 )''')
             cur.execute('''CREATE TABLE IF NOT EXISTS tasks (
-                id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 username VARCHAR(256) NOT NULL,
                 task VARCHAR(256) NOT NULL
                 )''')
@@ -33,9 +46,12 @@ def dict_factory(cursor, row):
 
 def exec(sql, *arg):
     try:
-        with closing(sqlite3.connect(db_path)) as con:
+        with closing(mysql.connector.connect(user='root', password='password',
+                                host='mysql', database='todo')) as con: #MySQL
+        #with closing(sqlite3.connect(db_path)) as con: #SQLite
             con.row_factory = dict_factory
-            cur = con.cursor()
+            cur = con.cursor(prepared=True,dictionary=True) #MySQL
+            #cur = con.cursor() #SQLite
             cur.execute(sql, arg)
             res = None
             if sql.lstrip().upper().startswith('SELECT'):
@@ -60,7 +76,7 @@ def index():
     tasks = exec(sql, username)
     if request.method == 'POST':
         if 'add' in request.form:
-            sql = 'INSERT INTO tasks (username, task) VALUES (:username, :task)'
+            sql = 'INSERT INTO tasks (username, task) VALUES (?, ?)'
             exec(sql, username, request.form['task'])
             return redirect(url_for('index'))
     if request.method == 'GET':

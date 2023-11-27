@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 import os, sqlite3, logging
 from contextlib import closing
+import mysql.connector
 
 TITLE = '書籍データ庫'
 app = Flask(__name__)
@@ -17,8 +18,11 @@ app.logger.setLevel(logging.DEBUG)
 
 def create_db():
     try:
-        with closing(sqlite3.connect(db_path)) as con:
-            cur = con.cursor()
+        with closing(mysql.connector.connect(user='root', password='password',
+                                host='mysql', database='books')) as con: #MySQL
+        #with closing(sqlite3.connect(db_path)) as con: #SQLite
+            cur = con.cursor(prepared=True,dictionary=True) #MySQL
+            #cur = con.cursor() #SQLite
             cur.execute('''CREATE TABLE IF NOT EXISTS books (
                 isbn VARCHAR(17) NOT NULL PRIMARY KEY,
                 name VARCHAR(255) NOT NULL,
@@ -35,9 +39,12 @@ def dict_factory(cursor, row):
 
 def exec(sql, *arg):
     try:
-        with closing(sqlite3.connect(db_path)) as con:
+        with closing(mysql.connector.connect(user='root', password='password',
+                                host='mysql', database='books')) as con: #MySQL
+        #with closing(sqlite3.connect(db_path)) as con: #SQLite
             con.row_factory = dict_factory
-            cur = con.cursor()
+            cur = con.cursor(prepared=True,dictionary=True) #MySQL
+            #cur = con.cursor() #SQLite
             cur.execute(sql, arg)
             res = None
             if sql.lstrip().upper().startswith('SELECT'):
