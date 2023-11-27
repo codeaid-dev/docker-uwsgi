@@ -3,6 +3,7 @@ import os, sqlite3, logging
 from contextlib import closing
 import random
 from datetime import timedelta
+import mysql.connector
 
 app = Flask(__name__)
 app.secret_key = 'Msd4EsJIk6AoVD3g' #セッション情報を暗号化するためのキー
@@ -20,10 +21,14 @@ app.logger.setLevel(logging.DEBUG)
 
 def create_db():
     try:
-        with closing(sqlite3.connect(db_path)) as con:
-            cur = con.cursor()
+        with closing(mysql.connector.connect(user='root', password='password',
+                                host='mysql', database='quiz')) as con: #MySQL
+        #with closing(sqlite3.connect(db_path)) as con: #SQLite
+            cur = con.cursor(prepared=True,dictionary=True) #MySQL
+            #cur = con.cursor() #SQLite
+            #For SQLite using AUTOINCREMENT, for MySQL using AUTO_INCREMENT
             cur.execute('''CREATE TABLE IF NOT EXISTS questions (
-            id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+            id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
             question VARCHAR(255) NOT NULL,
             answer VARCHAR(255) NOT NULL
             )''')
@@ -37,9 +42,12 @@ def dict_factory(cursor, row):
 
 def exec(sql, *arg):
     try:
-        with closing(sqlite3.connect(db_path)) as con:
+        with closing(mysql.connector.connect(user='root', password='password',
+                                host='mysql', database='quiz')) as con: #MySQL
+        #with closing(sqlite3.connect(db_path)) as con: #SQLite
             con.row_factory = dict_factory
-            cur = con.cursor()
+            cur = con.cursor(prepared=True,dictionary=True) #MySQL
+            #cur = con.cursor() #SQLite
             cur.execute(sql, arg)
             res = None
             if sql.lstrip().upper().startswith('SELECT'):
@@ -102,8 +110,11 @@ def quiz():
                 result = f"不正解です(正解：{question['answer']})"
     else:
         res = exec('SELECT * FROM questions')
-        question = random.choice(res)
-        session['question'] = question
+        if res:
+            question = random.choice(res)
+            session['question'] = question
+        else:
+            question = None
 
     return render_template('quiz.html', title='クイズ出題', values=question, result=result)
 
@@ -122,4 +133,4 @@ def save():
         return render_template('save.html', title='クイズ新規作成', values=values)
 
 if __name__ == '__main__':
-    app.run(port=8000, debug=True)
+    app.run(debug=True)
