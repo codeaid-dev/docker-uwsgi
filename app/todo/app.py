@@ -7,7 +7,7 @@ import mysql.connector
 
 app = Flask(__name__)
 app.secret_key = 'Msd4EsJIk6AoVD3g' #セッション情報を暗号化するためのキー
-app.permanent_session_lifetime = timedelta(minutes=10) #セッション有効期限10分
+app.permanent_session_lifetime = timedelta(seconds=60) #セッション有効期限60秒
 base_path = os.path.dirname(__file__)
 db_path = base_path + '/todo.db'
 
@@ -182,4 +182,4 @@ def edit():
     return render_template('edit.html', username=username, id=id, task=task)
 
 if __name__ == '__main__':
-    app.run(port=8000, debug=True)
+    app.run(debug=True)
