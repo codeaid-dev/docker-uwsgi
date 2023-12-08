@@ -6,7 +6,7 @@ ToDoアプリ
   <h1>ToDo - {{ username }}</h1>
   <form method="post">
     <input type="hidden" name="id" value="{{ id }}">
-    <textarea name="task" rows="4" cols="30">{{ task['task'] }}</textarea><br>
+    <textarea name="task" rows="4" cols="30" required>{{ task['task'] }}</textarea><br>
     <button type="submit" name="edit">修正</button>
   </form>
   <br>
