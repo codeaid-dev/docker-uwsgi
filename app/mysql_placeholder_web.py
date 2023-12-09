@@ -19,7 +19,7 @@ def index():
     now = datetime.datetime.now().strftime('%Y年%m月%d日%H:%M:%S.%f')
     return render_template('sample.html', page_name='トップページ！！', time=now)
 
-@app.route('/mysqlsample')
+@app.route('/mysqlplaceholder')
 def sample():
     now = datetime.datetime.now().strftime('%Y年%m月%d日%H:%M:%S')
     try:
@@ -34,12 +34,12 @@ def sample():
                         score INTEGER)''')
             res += 'テーブル作成<br>'
 
-            cur.execute("INSERT INTO users VALUES(1, 'Yamada', 85)")
-            cur.execute("INSERT INTO users VALUES(2, 'Tanaka', 79)")
-            cur.execute("INSERT INTO users VALUES(3, 'Suzuki', 63)")
+            data = [(1, 'Yamada', 85),(2, 'Tanaka', 79),(3, 'Suzuki', 63)]
+            for d in data:
+                cur.execute("INSERT INTO users VALUES(?, ?, ?)", d)
             res += 'データ挿入<br>'
 
-            cur.execute("SELECT * FROM users WHERE score >= 70")
+            cur.execute("SELECT * FROM users WHERE score >= ?", (70,))
             result = cur.fetchall()
             res += '70点以上選択<br>'
             for id,name,score in result:
