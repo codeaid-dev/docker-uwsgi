@@ -3,24 +3,27 @@ import os, sqlite3, hashlib, re, csv
 from datetime import timedelta
 from contextlib import closing
 from werkzeug.security import check_password_hash, generate_password_hash
+import mysql.connector
 
 app = Flask(__name__)
 app.secret_key = 'Msd4EsJIk6AoVD3g' #セッション情報を暗号化するためのキー
-app.permanent_session_lifetime = timedelta(minutes=10) #セッション有効期限10分
+app.permanent_session_lifetime = timedelta(seconds=60) #セッション有効期限60秒
 base_path = os.path.dirname(__file__)
 db_path = base_path + '/static/survey.db'
 csv_path = base_path + '/static/download.csv'
-
 def create_db():
     try:
-        with closing(sqlite3.connect(db_path)) as con:
+        with closing(mysql.connector.connect(user='root', password='password',
+                                host='mysql', database='survey')) as con: #MySQL
+        #with closing(sqlite3.connect(db_path)) as con: #SQLite
             cur = con.cursor()
             cur.execute('''CREATE TABLE IF NOT EXISTS siteadmin (
                 username VARCHAR(256) NOT NULL PRIMARY KEY,
                 password VARCHAR(256) NOT NULL
                 )''')
+            #MySQL
             cur.execute('''CREATE TABLE IF NOT EXISTS answers (
-                created_at DATETIME DEFAULT (DATETIME('now','localtime')),
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 name VARCHAR(256) NOT NULL,
                 email VARCHAR(256) NOT NULL PRIMARY KEY,
                 age VARCHAR(256) NOT NULL,
@@ -29,6 +32,17 @@ def create_db():
                 maker VARCHAR(256) NOT NULL,
                 comments VARCHAR(256)
                 )''')
+            #SQLite
+            #cur.execute('''CREATE TABLE IF NOT EXISTS answers (
+            #    created_at DATETIME DEFAULT (DATETIME('now','localtime')),
+            #    name VARCHAR(256) NOT NULL,
+            #    email VARCHAR(256) NOT NULL PRIMARY KEY,
+            #    age VARCHAR(256) NOT NULL,
+            #    program VARCHAR(256),
+            #    pc VARCHAR(256) NOT NULL,
+            #    maker VARCHAR(256) NOT NULL,
+            #    comments VARCHAR(256)
+            #    )''')
     except sqlite3.Error as e:
         app.logger.error(e)
 create_db()
@@ -39,9 +53,12 @@ def dict_factory(cursor, row):
 
 def exec(sql, *arg):
     try:
-        with closing(sqlite3.connect(db_path)) as con:
+        with closing(mysql.connector.connect(user='root', password='password',
+                                host='mysql', database='survey')) as con: #MySQL
+        #with closing(sqlite3.connect(db_path)) as con:
             con.row_factory = dict_factory
-            cur = con.cursor()
+            cur = con.cursor(prepared=True,dictionary=True) #MySQL
+            #cur = con.cursor() #SQLite
             if not arg:
                 cur.execute(sql)
             else:
@@ -50,8 +67,8 @@ def exec(sql, *arg):
             if sql.lstrip().upper().startswith('SELECT'):
                 res = cur.fetchall()
             con.commit()
-    except sqlite3.Error as e:
-        print(f'SQLエラー：{e}', f'arg:{arg}')
+    except mysql.connector.Error as e: #MySQL
+    #except sqlite3.Error as e: #SQLite
         app.logger.error(e)
     return res
 
@@ -118,7 +135,7 @@ def admin():
                 csvout.writerow(head)
                 for answer in answers:
                     csvout.writerow(answer.values())
-            return send_file(csv_path,mimetype='text/csv',download_name='downlaod.csv',as_attachment=True)
+            return send_file('static/download.csv',mimetype='text/csv',download_name='downlaod.csv',as_attachment=True)
         if 'delete' in request.form:
             email = request.form['delete']
             sql = 'DELETE FROM answers WHERE email=?'

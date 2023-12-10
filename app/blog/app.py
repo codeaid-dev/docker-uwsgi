@@ -3,6 +3,7 @@ import os, sqlite3, hashlib, re
 from datetime import timedelta
 from contextlib import closing
 from werkzeug.security import check_password_hash, generate_password_hash
+import mysql.connector
 
 app = Flask(__name__)
 app.secret_key = 'Msd4EsJIk6AoVD3g' #セッション情報を暗号化するためのキー
@@ -12,25 +13,38 @@ db_path = base_path + '/static/blog.db'
 
 def create_db():
     try:
-        with closing(sqlite3.connect(db_path)) as con:
-            cur = con.cursor()
+        with closing(mysql.connector.connect(user='root', password='password',
+                                host='mysql', database='blog')) as con: #MySQL
+        #with closing(sqlite3.connect(db_path)) as con: #SQLite
+            cur = con.cursor(prepared=True,dictionary=True) #MySQL
+            #cur = con.cursor() #SQLite
+            #For SQLite using AUTOINCREMENT, for MySQL using AUTO_INCREMENT
             cur.execute('''CREATE TABLE IF NOT EXISTS siteadmin (
                 username VARCHAR(256) NOT NULL PRIMARY KEY,
                 password VARCHAR(256) NOT NULL
                 )''')
+            #MySQL
             cur.execute('''CREATE TABLE IF NOT EXISTS posts (
-                id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                created_at DATETIME DEFAULT (DATETIME('now','localtime')),
-                updated_at DATETIME DEFAULT (DATETIME('now','localtime')),
+                id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 title VARCHAR(256) NOT NULL,
                 article VARCHAR(256) NOT NULL
                 )''')
-            cur.execute('''CREATE TRIGGER trigger_updated_at AFTER UPDATE ON posts
-                BEGIN
-                    UPDATE posts SET updated_at = DATETIME('now', 'localtime') WHERE rowid == NEW.rowid;
-                END''')
-    except sqlite3.Error as e:
-        print(e)
+            #SQLite
+            #cur.execute('''CREATE TABLE IF NOT EXISTS posts (
+            #    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+            #   created_at DATETIME DEFAULT (DATETIME('now','localtime')),
+            #    updated_at DATETIME DEFAULT (DATETIME('now','localtime')),
+            #    title VARCHAR(256) NOT NULL,
+            #    article VARCHAR(256) NOT NULL
+            #    )''')
+            #cur.execute('''CREATE TRIGGER trigger_updated_at AFTER UPDATE ON posts
+            #    BEGIN
+            #        UPDATE posts SET updated_at = DATETIME('now', 'localtime') WHERE rowid == NEW.rowid;
+            #    END''')
+    except mysql.connector.Error as e: #MySQL
+    #except sqlite3.Error as e: #SQLite
         app.logger.error(e)
 create_db()
 
@@ -41,9 +55,12 @@ def dict_factory(cursor, row):
 def exec(sql, *arg):
     res = None
     try:
-        with closing(sqlite3.connect(db_path)) as con:
+        with closing(mysql.connector.connect(user='root', password='password',
+                                host='mysql', database='blog')) as con: #MySQL
+        #with closing(sqlite3.connect(db_path)) as con: #SQLite
             con.row_factory = dict_factory
-            cur = con.cursor()
+            cur = con.cursor(prepared=True,dictionary=True) #MySQL
+            #cur = con.cursor() #SQLite
             if not arg:
                 cur.execute(sql)
             else:
@@ -51,8 +68,8 @@ def exec(sql, *arg):
             if sql.lstrip().upper().startswith('SELECT'):
                 res = cur.fetchall()
             con.commit()
-    except sqlite3.Error as e:
-        print(f'SQLエラー：{e}', f'arg:{arg}')
+    except mysql.connector.Error as e: #MySQL
+    #except sqlite3.Error as e: #SQLite
         app.logger.error(e)
     return res
 
@@ -70,10 +87,13 @@ def index():
     if post_id is None or post_id=='':
         if posts:
             for post in posts:
-                index = post['created_at'].find(' ')
-                post['created_at'] = post['created_at'][:index].replace('-','/')
-                index = post['updated_at'].find(' ')
-                post['updated_at'] = post['updated_at'][:index].replace('-','/')
+                #index = post['created_at'].find(' ') #SQLite
+                #post['created_at'] = post['created_at'][:index].replace('-','/') #SQLite
+                post['created_at'] = post['created_at'].strftime('%Y/%m/%d') #MySQL
+                #index = post['updated_at'].find(' ') #SQLite
+                #post['updated_at'] = post['updated_at'][:index].replace('-','/') #SQLite
+                post['updated_at'] = post['updated_at'].strftime('%Y/%m/%d') #MySQL
+
         return render_template('index.html', posts=posts)
     else:
         for post in posts:
@@ -96,10 +116,12 @@ def admin():
     posts = exec(sql)
     if posts:
         for post in posts:
-            index = post['created_at'].find(' ')
-            post['created_at'] = post['created_at'][:index].replace('-','/')
-            index = post['updated_at'].find(' ')
-            post['updated_at'] = post['updated_at'][:index].replace('-','/')
+            #index = post['created_at'].find(' ') #SQLite
+            #post['created_at'] = post['created_at'][:index].replace('-','/') #SQLite
+            post['created_at'] = post['created_at'].strftime('%Y/%m/%d') #MySQL
+            #index = post['updated_at'].find(' ') #SQLite
+            #post['updated_at'] = post['updated_at'][:index].replace('-','/') #SQLite
+            post['updated_at'] = post['updated_at'].strftime('%Y/%m/%d') #MySQL
 
     return render_template('admin.html', posts=posts)
 

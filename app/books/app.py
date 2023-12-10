@@ -29,7 +29,8 @@ def create_db():
                 price INTEGER NOT NULL,
                 page INTEGER NOT NULL,
                 date TEXT NOT NULL)''')
-    except sqlite3.Error as e:
+    except mysql.connector.Error as e: #MySQL
+    #except sqlite3.Error as e: #SQLite
         app.logger.error(e)
 create_db()
 
@@ -50,7 +51,8 @@ def exec(sql, *arg):
             if sql.lstrip().upper().startswith('SELECT'):
                 res = cur.fetchall()
             con.commit()
-    except sqlite3.Error as e:
+    except mysql.connector.Error as e: #MySQL
+    #except sqlite3.Error as e: #SQLite
         app.logger.error(e)
     return res
 
