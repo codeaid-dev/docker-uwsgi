@@ -39,7 +39,7 @@ def create_db():
             #    title VARCHAR(256) NOT NULL,
             #    article VARCHAR(256) NOT NULL
             #    )''')
-            #cur.execute('''CREATE TRIGGER trigger_updated_at AFTER UPDATE ON posts
+            #cur.execute('''CREATE TRIGGER IF NOT EXISTS trigger_updated_at AFTER UPDATE ON posts
             #    BEGIN
             #        UPDATE posts SET updated_at = DATETIME('now', 'localtime') WHERE rowid == NEW.rowid;
             #    END''')
