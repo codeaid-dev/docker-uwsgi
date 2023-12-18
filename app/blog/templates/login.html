@@ -9,10 +9,10 @@
   <p>{{ error }}</p>
 {% endif %}
 <form action="{{ url_for('login') }}" method="POST">
-  ユーザー名：<input type="text" name="username" required><br>
+  管理者名：<input type="text" name="username" required><br>
   パスワード：<input type="password" name="password" required><br>
   <button type="submit">送信</button>
 </form>
 <br>
-<a href="{{ url_for('signup') }}">ユーザー登録</a>
+<a href="{{ url_for('signup') }}">管理者登録</a>
 {% endblock %}
