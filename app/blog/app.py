@@ -4,9 +4,10 @@ from datetime import timedelta
 from contextlib import closing
 from werkzeug.security import check_password_hash, generate_password_hash
 import mysql.connector
+import random, string
 
 app = Flask(__name__)
-app.secret_key = 'Msd4EsJIk6AoVD3g' #セッション情報を暗号化するためのキー
+app.secret_key = ''.join(random.choices(string.ascii_letters + string.digits, k=16)) #セッション情報を暗号化するためのキー
 app.permanent_session_lifetime = timedelta(minutes=10) #セッション有効期限10分
 base_path = os.path.dirname(__file__)
 db_path = base_path + '/static/blog.db'
