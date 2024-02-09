@@ -12,6 +12,7 @@ app.permanent_session_lifetime = timedelta(seconds=60) #セッション有効期
 base_path = os.path.dirname(__file__)
 db_path = base_path + '/static/survey.db'
 csv_path = base_path + '/static/download.csv'
+
 def create_db():
     try:
         with closing(mysql.connector.connect(user='root', password='password',
