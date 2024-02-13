@@ -75,10 +75,18 @@ def exec(sql, *arg):
     return res
 
 def to_hash(password):
-    password += 'uMoJL3h90SenH7:r' #SALTを加える
+    salt = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
+    password += salt
     text = password.encode('utf-8')
     hash = hashlib.sha256(text).hexdigest()
-    return hash
+    return salt + hash
+
+def verify_password(password, hash):
+    salt, digest = hash[:16], hash[16:]
+    password += salt
+    text = password.encode('utf-8')
+    hash = hashlib.sha256(text).hexdigest()
+    return digest == hash
 
 @app.route('/blog/')
 def index():
@@ -170,25 +178,16 @@ def login():
     error = ''
     if request.method == 'POST':
         username = request.form['username']
-
         password = request.form['password']
         sql = 'SELECT * FROM siteadmin WHERE username=?'
         user = exec(sql, username)
         if not user or not check_password_hash(user[0]['password'], password):
+        #if not user or not verify_password(password, user[0]['password']):
             error = 'ログインに失敗しました。'
         else:
             session['username'] = username
             return redirect(url_for('admin'))
 
-        #自身でハッシュ化する場合
-        #password = to_hash(request.form['password'])
-        #sql = 'SELECT * FROM siteadmin WHERE username=? AND password=?'
-        #result = exec(sql, username, password)
-        #if result:
-        #    session['username'] = username
-        #    return redirect(url_for('admin'))
-        #else:
-        #    error = 'ログイン失敗'
     return render_template('login.html', error=error)
 
 @app.route('/blog/admin/logout')
@@ -223,8 +222,8 @@ def signup():
         username = request.form['username']
         pwd = re.search(re.compile('(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[\W_])[\w\W]{8,32}$'), request.form['password'])
         if pwd != None:
-            #password = to_hash(request.form['password'])
             password = generate_password_hash(request.form['password'])
+            #password = to_hash(request.form['password'])
             sql = 'INSERT INTO siteadmin (username, password) VALUES (?, ?)'
             exec(sql, username, password)
             session['username'] = username

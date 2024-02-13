@@ -65,10 +65,18 @@ def exec(sql, *arg):
     return res
 
 def to_hash(password):
-    password += 'uMoJL3h90SenH7:r' #SALTを加える
+    salt = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
+    password += salt
     text = password.encode('utf-8')
     hash = hashlib.sha256(text).hexdigest()
-    return hash
+    return salt + hash
+
+def verify_password(password, hash):
+    salt, digest = hash[:16], hash[16:]
+    password += salt
+    text = password.encode('utf-8')
+    hash = hashlib.sha256(text).hexdigest()
+    return digest == hash
 
 @app.route('/todo/', methods=['GET', 'POST'])
 def index():
@@ -104,20 +112,12 @@ def login():
         if not user:
             error = 'ユーザー名が誤っています。'
         elif not check_password_hash(user[0]['password'], password):
+        #elif not verify_password(password, user[0]['password']):
             error = 'パスワードが誤っています。'
         else:
             session['username'] = username
             return redirect(url_for('index'))
 
-        #自身でハッシュ化する場合
-        #password = to_hash(request.form['password'])
-        #sql = 'SELECT * FROM users WHERE username=? AND password=?'
-        #result = exec(sql, username, password)
-        #if result:
-        #    session['username'] = username
-        #    return redirect(url_for('index'))
-        #else:
-        #    error = 'ログイン失敗'
     return render_template('login.html', error=error)
 
 @app.route('/todo/logout')
@@ -150,8 +150,8 @@ def signup():
         pwd = re.search(re.compile('(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[\W_])[\w\W]{8,32}$'), request.form['password'])
         if pwd != None:
           print('有効なパスワードです')
-          #password = to_hash(request.form['password'])
           password = generate_password_hash(request.form['password'])
+          #password = to_hash(request.form['password'])
           sql = 'SELECT * FROM users WHERE username=?'
           result = exec(sql, username)
           if result:
