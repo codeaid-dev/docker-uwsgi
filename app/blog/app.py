@@ -4,10 +4,10 @@ from datetime import timedelta
 from contextlib import closing
 from werkzeug.security import check_password_hash, generate_password_hash
 import mysql.connector
-import random, string
+from base64 import b64encode, b64decode
 
 app = Flask(__name__)
-app.secret_key = ''.join(random.choices(string.ascii_letters + string.digits, k=16)) #セッション情報を暗号化するためのキー
+app.secret_key = b64encode(os.urandom(16)).decode() #セッション情報を暗号化するためのキー
 app.permanent_session_lifetime = timedelta(minutes=10) #セッション有効期限10分
 base_path = os.path.dirname(__file__)
 db_path = base_path + '/static/blog.db'
@@ -75,18 +75,15 @@ def exec(sql, *arg):
     return res
 
 def hash_password(password):
-    salt = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
-    password += salt
-    text = password.encode('utf-8')
-    hash = hashlib.sha256(text).hexdigest()
-    return salt + hash
+    salt = os.urandom(16) #16バイトのバイト列
+    digest = hashlib.pbkdf2_hmac('sha256',password.encode('utf-8'),salt,10000)
+    return b64encode(salt + digest).decode()
 
 def verify_password(password, hash):
-    salt, digest = hash[:16], hash[16:]
-    password += salt
-    text = password.encode('utf-8')
-    hash = hashlib.sha256(text).hexdigest()
-    return digest == hash
+    b = b64decode(hash)
+    salt, verify = b[:16], b[16:]
+    digest = hashlib.pbkdf2_hmac('sha256',password.encode('utf-8'),salt,10000)
+    return digest == verify
 
 @app.route('/blog/')
 def index():
@@ -181,8 +178,8 @@ def login():
         password = request.form['password']
         sql = 'SELECT * FROM siteadmin WHERE username=?'
         user = exec(sql, username)
-        if not user or not check_password_hash(user[0]['password'], password):
-        #if not user or not verify_password(password, user[0]['password']):
+        #if not user or not check_password_hash(user[0]['password'], password):
+        if not user or not verify_password(password, user[0]['password']):
             error = 'ログインに失敗しました。'
         else:
             session['username'] = username
@@ -222,8 +219,8 @@ def signup():
         username = request.form['username']
         pwd = re.search(re.compile('(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[\W_])[\w\W]{8,32}$'), request.form['password'])
         if pwd != None:
-            password = generate_password_hash(request.form['password'])
-            #password = hash_password(request.form['password'])
+            #password = generate_password_hash(request.form['password'])
+            password = hash_password(request.form['password'])
             sql = 'INSERT INTO siteadmin (username, password) VALUES (?, ?)'
             exec(sql, username, password)
             session['username'] = username
