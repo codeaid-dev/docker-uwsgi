@@ -74,7 +74,7 @@ def exec(sql, *arg):
         app.logger.error(e)
     return res
 
-def to_hash(password):
+def hash_password(password):
     salt = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
     password += salt
     text = password.encode('utf-8')
@@ -223,7 +223,7 @@ def signup():
         pwd = re.search(re.compile('(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[\W_])[\w\W]{8,32}$'), request.form['password'])
         if pwd != None:
             password = generate_password_hash(request.form['password'])
-            #password = to_hash(request.form['password'])
+            #password = hash_password(request.form['password'])
             sql = 'INSERT INTO siteadmin (username, password) VALUES (?, ?)'
             exec(sql, username, password)
             session['username'] = username

@@ -64,7 +64,7 @@ def exec(sql, *arg):
         app.logger.error(e)
     return res
 
-def to_hash(password):
+def hash_password(password):
     salt = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
     password += salt
     text = password.encode('utf-8')
@@ -151,7 +151,7 @@ def signup():
         if pwd != None:
           print('有効なパスワードです')
           password = generate_password_hash(request.form['password'])
-          #password = to_hash(request.form['password'])
+          #password = hash_password(request.form['password'])
           sql = 'SELECT * FROM users WHERE username=?'
           result = exec(sql, username)
           if result:
