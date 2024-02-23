@@ -165,8 +165,8 @@ def login():
         password = request.form['password']
         sql = 'SELECT * FROM siteadmin WHERE username=?'
         user = exec(sql, username)
-        #if not user or not check_password_hash(user[0]['password'], password):
-        if not user or not verify_password(password, user[0]['password']):
+        if not user or not check_password_hash(user[0]['password'], password):
+        #if not user or not verify_password(password, user[0]['password']):
             error = 'ログインに失敗しました。'
         else:
             session['username'] = username
@@ -207,8 +207,8 @@ def signup():
             username = request.form['username']
             pwd = re.search(re.compile('(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[\W_])[\w\W]{8,32}$'), request.form['password'])
             if pwd != None:
-                #password = generate_password_hash(request.form['password'])
-                password = hash_password(request.form['password'])
+                password = generate_password_hash(request.form['password'])
+                #password = hash_password(request.form['password'])
                 sql = 'INSERT INTO siteadmin (username, password) VALUES (?, ?)'
                 exec(sql, username, password)
                 session['username'] = username
