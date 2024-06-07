@@ -142,7 +142,7 @@ def admin():
                 csvout.writerow(head)
                 for answer in answers:
                     csvout.writerow(answer.values())
-            return send_file('static/download.csv',mimetype='text/csv',download_name='downlaod.csv',as_attachment=True)
+            return send_file('static/download.csv',mimetype='text/csv',download_name='download.csv',as_attachment=True)
         if 'delete' in request.form:
             email = request.form['delete']
             sql = 'DELETE FROM answers WHERE email=?'
