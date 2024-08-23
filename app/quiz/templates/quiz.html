@@ -13,9 +13,7 @@
     {% if result %}
       <p>{{ result }}</p>
     {% endif %}
-    <form action="{{ url_for('quiz') }}" method="GET">
-      <button type="submit">次の問題</button>
-    </form>
+    <a href="{{ url_for('quiz') }}"><button>次の問題</button></a>
   {% else %}
     <p>問題がありません。</p>
   {% endif %}
