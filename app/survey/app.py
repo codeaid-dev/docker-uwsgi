@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import mysql.connector
 from base64 import b64encode, b64decode
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/survey/static')
 app.secret_key = b64encode(os.urandom(16)).decode() #セッション情報を暗号化するためのキー
 app.permanent_session_lifetime = timedelta(seconds=60) #セッション有効期限60秒
 base_path = os.path.dirname(__file__)
@@ -92,7 +92,7 @@ def has_email(email):
         return True
     return False
 
-@app.route('/survey/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def index():
     postdata = {'name':'','email':'','age':'','program':{},'pc':'','maker':[],'comments':''}
     makers = ['Lenovo','DELL','HP','Apple','Dynabook','NEC','VAIO','ASUS','自作','その他']
@@ -127,7 +127,7 @@ def index():
             return render_template('thanks.html', postdata=postdata, programs=programs, maker=maker)
     return render_template('index.html', postdata=postdata, errors=errors)
 
-@app.route('/survey/admin/', methods=['GET', 'POST'])
+@app.route('/admin/', methods=['GET', 'POST'])
 def admin():
     if not 'username' in session:
         return redirect(url_for('login'))
@@ -154,7 +154,7 @@ def admin():
     answers = exec(sql)
     return render_template('admin.html', answers=answers)
 
-@app.route('/survey/admin/login', methods=['GET','POST'])
+@app.route('/admin/login', methods=['GET','POST'])
 def login():
     if 'username' in session:
         return redirect(url_for('admin'))
@@ -174,7 +174,7 @@ def login():
 
     return render_template('login.html', error=error)
 
-@app.route('/survey/admin/logout')
+@app.route('/admin/logout')
 def logout():
     if not 'username' in session:
         return redirect(url_for('login'))
@@ -182,7 +182,7 @@ def logout():
     session.pop('username', None)
     return render_template('logout.html', username=username)
 
-@app.route('/survey/admin/leave')
+@app.route('/admin/leave')
 def leave():
     if not 'username' in session:
         return redirect(url_for('login'))
@@ -192,7 +192,7 @@ def leave():
     exec(sql, username)
     return render_template('leave.html', username=username)
 
-@app.route('/survey/admin/signup', methods=['GET','POST'])
+@app.route('/admin/signup', methods=['GET','POST'])
 def signup():
     if 'username' in session:
         return redirect(url_for('admin'))

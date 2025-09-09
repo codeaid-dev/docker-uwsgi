@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import mysql.connector
 from base64 import b64encode, b64decode
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/todo/static')
 app.secret_key = b64encode(os.urandom(16)).decode() #セッション情報を暗号化するためのキー
 app.permanent_session_lifetime = timedelta(seconds=60) #セッション有効期限60秒
 base_path = os.path.dirname(__file__)
@@ -75,7 +75,7 @@ def verify_password(password, hash):
     digest = hashlib.pbkdf2_hmac('sha256',password.encode('utf-8'),salt,10000)
     return digest == verify
 
-@app.route('/todo/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def index():
     if not 'username' in session:
         return redirect(url_for('login'))
@@ -95,7 +95,7 @@ def index():
             return redirect(url_for('index'))
     return render_template('index.html', username=username, tasks=tasks, id=id)
 
-@app.route('/todo/login', methods=['GET','POST'])
+@app.route('/login', methods=['GET','POST'])
 def login():
     if 'username' in session:
         return redirect(url_for('index'))
@@ -117,7 +117,7 @@ def login():
 
     return render_template('login.html', error=error)
 
-@app.route('/todo/logout')
+@app.route('/logout')
 def logout():
     if not 'username' in session:
         return redirect(url_for('login'))
@@ -125,7 +125,7 @@ def logout():
     session.pop('username', None)
     return render_template('logout.html', username=username)
 
-@app.route('/todo/leave')
+@app.route('/leave')
 def leave():
     if not 'username' in session:
         return redirect(url_for('login'))
@@ -137,7 +137,7 @@ def leave():
     exec(sql, username)
     return render_template('leave.html', username=username)
 
-@app.route('/todo/signup', methods=['GET','POST'])
+@app.route('/signup', methods=['GET','POST'])
 def signup():
     if 'username' in session:
         return redirect(url_for('index'))
@@ -162,7 +162,7 @@ def signup():
             error = 'パスワードは8~32文字で大小文字英字数字記号をそれぞれ1文字以上含める必要があります。'
     return render_template('signup.html', error=error)
 
-@app.route('/todo/edit', methods=['GET','POST'])
+@app.route('/edit', methods=['GET','POST'])
 def edit():
     if not 'username' in session:
         return redirect(url_for('login'))

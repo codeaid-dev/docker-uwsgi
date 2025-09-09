@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import mysql.connector
 from base64 import b64encode, b64decode
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/blog/static')
 app.secret_key = b64encode(os.urandom(16)).decode() #セッション情報を暗号化するためのキー
 app.permanent_session_lifetime = timedelta(minutes=10) #セッション有効期限10分
 base_path = os.path.dirname(__file__)
@@ -85,7 +85,7 @@ def verify_password(password, hash):
     digest = hashlib.pbkdf2_hmac('sha256',password.encode('utf-8'),salt,10000)
     return digest == verify
 
-@app.route('/blog/')
+@app.route('/')
 def index():
     sql = 'SELECT * FROM posts ORDER BY updated_at DESC'
     posts = exec(sql)
@@ -112,7 +112,7 @@ def index():
 def page_not_found(e):
     return render_template('404.html'), 404
 
-@app.route('/blog/admin/')
+@app.route('/admin/')
 def admin():
     if not 'username' in session:
         return redirect(url_for('login'))
@@ -131,7 +131,7 @@ def admin():
 
     return render_template('admin.html', posts=posts)
 
-@app.route('/blog/admin/add', methods=['GET','POST'])
+@app.route('/admin/add', methods=['GET','POST'])
 def add():
     if not 'username' in session:
         return redirect(url_for('login'))
@@ -145,7 +145,7 @@ def add():
 
     return render_template('add.html')
 
-@app.route('/blog/admin/edit', methods=['GET','POST'])
+@app.route('/admin/edit', methods=['GET','POST'])
 def edit():
     if not 'username' in session:
         return redirect(url_for('login'))
@@ -168,7 +168,7 @@ def edit():
             exec(sql, request.form['id'])
         return redirect(url_for('admin'))
 
-@app.route('/blog/admin/login', methods=['GET','POST'])
+@app.route('/admin/login', methods=['GET','POST'])
 def login():
     if 'username' in session:
         return redirect(url_for('admin'))
@@ -187,7 +187,7 @@ def login():
 
     return render_template('login.html', error=error)
 
-@app.route('/blog/admin/logout')
+@app.route('/admin/logout')
 def logout():
     if not 'username' in session:
         return redirect(url_for('login'))
@@ -195,7 +195,7 @@ def logout():
     session.pop('username', None)
     return render_template('logout.html', username=username)
 
-@app.route('/blog/admin/leave')
+@app.route('/admin/leave')
 def leave():
     if not 'username' in session:
         return redirect(url_for('login'))
@@ -205,7 +205,7 @@ def leave():
     exec(sql, username)
     return render_template('leave.html', username=username)
 
-@app.route('/blog/admin/signup', methods=['GET','POST'])
+@app.route('/admin/signup', methods=['GET','POST'])
 def signup():
     if 'username' in session:
         return redirect(url_for('admin'))
