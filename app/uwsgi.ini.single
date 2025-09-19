@@ -1,0 +1,8 @@
+[uwsgi]
+wsgi-file = app.py
+callable = app
+processes = 4
+threads = 2
+socket = uwsgi:3031
+vacuum = true
+touch-reload = reload.txt

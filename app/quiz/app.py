@@ -6,7 +6,7 @@ from datetime import timedelta
 import mysql.connector
 import random, string
 
-app = Flask(__name__, static_url_path='/quiz/static')
+app = Flask(__name__)
 app.secret_key = ''.join(random.choices(string.ascii_letters + string.digits, k=16)) #セッション情報を暗号化するためのキー
 app.permanent_session_lifetime = timedelta(minutes=10) #セッション有効期限10分
 base_path = os.path.dirname(__file__)

@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import mysql.connector
 from base64 import b64encode, b64decode
 
-app = Flask(__name__, static_url_path='/blog/static')
+app = Flask(__name__)
 app.secret_key = b64encode(os.urandom(16)).decode() #セッション情報を暗号化するためのキー
 app.permanent_session_lifetime = timedelta(minutes=10) #セッション有効期限10分
 base_path = os.path.dirname(__file__)

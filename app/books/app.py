@@ -4,7 +4,7 @@ from contextlib import closing
 import mysql.connector
 
 TITLE = '書籍データ庫'
-app = Flask(__name__, static_url_path='/books/static')
+app = Flask(__name__)
 base_path = os.path.dirname(__file__)
 db_path = base_path + '/books.db'
 

@@ -17,6 +17,7 @@ services:
       - "8000:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./app:/var/www
     depends_on:
       - uwsgi
     restart: always
