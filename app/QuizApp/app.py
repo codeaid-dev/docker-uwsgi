@@ -11,7 +11,7 @@ from flask import (
     flash
 )
 
-from database import get_connection, initialize_database
+from .database import get_connection, initialize_database
 
 app = Flask(__name__)
 # セッション用の秘密鍵
@@ -146,7 +146,7 @@ def register():
                     values["correct_answer"],
                     values["explanation"]
                 ))
-            flash("問題を登録しました。")
+            flash("問題を登録しました。", "success")
             return redirect(url_for("index"))
         return render_template(
             "form.html",
@@ -182,7 +182,7 @@ def register():
 def edit(question_id):
     question = get_question(question_id)
     if question is None:
-        flash("対象の問題がありません。")
+        flash("対象の問題がありません。", "error")
         return redirect(url_for("index"))
     categories = get_categories()
     if request.method == "POST":
@@ -213,7 +213,7 @@ def edit(question_id):
                     question_id
                 ))
 
-            flash("問題を更新しました。")
+            flash("問題を更新しました。", "success")
             return redirect(url_for("index"))
         return render_template(
             "form.html",
@@ -241,7 +241,7 @@ def delete(question_id):
             WHERE id = ?
         """, (question_id,))
 
-    flash("問題を削除しました。")
+    flash("問題を削除しました。", "success")
     return redirect(url_for("index"))
 
 # --------------------------------
@@ -255,7 +255,7 @@ def quiz_start():
         except (ValueError, TypeError):
             count = 0
         if count < 1 or count > 50:
-            flash("出題数は1～50で指定してください。")
+            flash("出題数は1～50で指定してください。", "error")
             return redirect(url_for("quiz_start"))
         with get_connection() as conn:
             all_questions = conn.execute("""
@@ -264,11 +264,11 @@ def quiz_start():
             """).fetchall()
         total_count = len(all_questions)
         if total_count == 0:
-            flash("出題できる問題がありません。")
+            flash("出題できる問題がありません。", "error")
             return redirect(url_for("quiz_start"))
         if count > total_count:
             flash(
-                f"出題数は{total_count}問以下にしてください。"
+                f"出題数は{total_count}問以下にしてください。", "error"
             )
             return redirect(url_for("quiz_start"))
         # Python側でランダムに並べ替える
@@ -323,10 +323,10 @@ def quiz_answer():
     try:
         answer = int(request.form.get("answer", ""))
     except (ValueError, TypeError):
-        flash("回答を選択してください。")
+        flash("回答を選択してください。", "error")
         return redirect(url_for("quiz_question"))
     if answer not in (1, 2, 3, 4):
-        flash("回答が正しくありません。")
+        flash("回答が正しくありません。", "error")
         return redirect(url_for("quiz_question"))
     question = quiz["questions"][quiz["current"]]
     correct = answer == question["correct_answer"]
@@ -395,7 +395,7 @@ def quiz_complete():
 @app.route("/quiz/finish", methods=["POST"])
 def quiz_finish():
     session.pop("quiz", None)
-    flash("クイズを終了しました。")
+    flash("クイズを終了しました。", "success")
     return redirect(url_for("index"))
 
 # --------------------------------
@@ -404,4 +404,6 @@ def quiz_finish():
 initialize_database()
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0',
+            port=8080,
+            debug=True)

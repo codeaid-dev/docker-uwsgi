@@ -14,7 +14,6 @@
     <label>カテゴリ</label>
     <select name="category_id">
       <option value="">選択してください</option>
-
       {% for category in categories %}
       <option value="{{ category.id }}"
         {% if values.category_id|string == category.id|string %}
@@ -24,7 +23,7 @@
       </option>
       {% endfor %}
     </select>
-</div>
+  </div>
   <div>
     <label>問題文</label>
     <textarea name="question">{{ values.question }}</textarea>
