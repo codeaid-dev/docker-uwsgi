@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>クイズ開始</h2>
+<form method="post">
+  <div>
+    <label>出題数</label>
+    <input type="number"
+            name="question_count"
+            min="1"
+            max="50"
+            value="3"
+            required>
+  </div>
+  <button type="submit">クイズ開始</button>
+</form>
+{% endblock %}

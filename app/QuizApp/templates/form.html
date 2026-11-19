@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>{{ title }}</h2>
+{% if errors %}
+<ul class="errors">
+  {% for error in errors %}
+  <li>{{ error }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+<form method="post">
+  <div>
+    <label>カテゴリ</label>
+    <select name="category_id">
+      <option value="">選択してください</option>
+
+      {% for category in categories %}
+      <option value="{{ category.id }}"
+        {% if values.category_id|string == category.id|string %}
+            selected
+        {% endif %}>
+        {{ category.name }}
+      </option>
+      {% endfor %}
+    </select>
+</div>
+  <div>
+    <label>問題文</label>
+    <textarea name="question">{{ values.question }}</textarea>
+  </div>
+  {% for i in range(1, 5) %}
+  <div>
+    <label>選択肢{{ i }}</label>
+    <input type="text"
+            name="choice{{ i }}"
+            value="{{ values['choice' ~ i] }}">
+  </div>
+  {% endfor %}
+  <div>
+    <label>正解</label>
+    <select name="correct_answer">
+      {% for i in range(1, 5) %}
+      <option value="{{ i }}"
+        {% if values.correct_answer|string == i|string %}
+            selected
+        {% endif %}>
+        選択肢{{ i }}
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label>解説</label>
+    <textarea name="explanation">{{ values.explanation }}</textarea>
+  </div>
+  <button type="submit">保存</button>
+</form>
+<p><a href="{{ url_for('index') }}">一覧に戻る</a></p>
+{% endblock %}

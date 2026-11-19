@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title if title else "4択クイズ学習システム" }}</title>
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header>
+  <h1>4択クイズ学習システム</h1>
+  <nav>
+    <a href="{{ url_for('index') }}">問題一覧</a>
+    <a href="{{ url_for('register') }}">問題登録</a>
+    <a href="{{ url_for('quiz_start') }}">クイズ開始</a>
+  </nav>
+</header>
+<main>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>

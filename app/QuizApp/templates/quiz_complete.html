@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>クイズ終了</h2>
+<p>出題数：{{ total }} 問</p>
+<p>正解数：{{ correct }} 問</p>
+<p>正答率：{{ percentage }} %</p>
+<form method="post" action="{{ url_for('quiz_finish') }}">
+  <button type="submit">終了して一覧に戻る</button>
+</form>
+<p>
+  <a href="{{ url_for('quiz_start') }}">もう一度クイズに挑戦</a>
+</p>
+{% endblock %}

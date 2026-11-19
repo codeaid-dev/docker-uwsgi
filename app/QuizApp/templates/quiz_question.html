@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>クイズ</h2>
+<p>{{ current }} / {{ total }} 問</p>
+<h3>{{ question.question }}</h3>
+<form method="post" action="{{ url_for('quiz_answer') }}">
+  {% for i in range(1, 5) %}
+  <div>
+    <label>
+      <input type="radio"
+              name="answer"
+              value="{{ i }}"
+              required>
+      {{ question['choice' ~ i] }}
+    </label>
+  </div>
+  {% endfor %}
+  <button type="submit">回答する</button>
+</form>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>回答結果</h2>
+<p>{{ current }} / {{ total }} 問</p>
+{% if answer.is_correct %}
+  <h3 class="correct">正解です！</h3>
+{% else %}
+  <h3 class="incorrect">不正解です。</h3>
+{% endif %}
+<p>
+  あなたの回答：
+  {{ question['choice' ~ answer.selected] }}
+</p>
+<p>
+  正解：
+  {{ question['choice' ~ question.correct_answer] }}
+</p>
+<h3>解説</h3>
+<p>{{ question.explanation }}</p>
+<form method="post" action="{{ url_for('quiz_next') }}">
+  <button type="submit">
+    {% if current == total %}
+        結果を見る
+    {% else %}
+        次の問題へ
+    {% endif %}
+  </button>
+</form>
+{% endblock %}
